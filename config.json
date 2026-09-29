@@ -1,0 +1,7 @@
+{
+  "apiBase": "https://api.siliconflow.cn/v1",
+  "apiKey": "",
+  "model": "Qwen/Qwen-Image-Edit",
+  "mode": "generations",
+  "note": "apiBase 填服务商的 OpenAI 兼容地址；mode=generations 走 JSON 提交（参考图以 base64 数组传入），mode=edits 走 multipart 表单。国内可选：硅基流动 / 智谱 / 火山方舟 / 阿里百炼，模型需支持图生图（如 Qwen-Image-Edit、seedream、CogView）。"
+}

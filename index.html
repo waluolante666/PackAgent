@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>纹缬 PackAgent · 包装设计 AI 智能体与素材检索数据库</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-mark">纹</div>
+    <div class="brand-text">
+      <h1>纹缬 PackAgent</h1>
+      <p>面向多产业应用的包装设计 AI 智能体 · 双体系素材检索数据库</p>
+    </div>
+  </div>
+  <nav class="tabs" id="tabs">
+    <button class="tab active" data-tab="agent">AI 智能体</button>
+    <button class="tab" data-tab="db">素材数据库</button>
+    <button class="tab" data-tab="tag">素材标注</button>
+    <button class="tab" data-tab="case">案例验证</button>
+    <button class="tab" data-tab="about">项目说明</button>
+  </nav>
+</header>
+
+<!-- ================= AI 智能体 ================= -->
+<main class="view active" id="view-agent">
+  <section class="workspace">
+
+    <aside class="panel input-panel">
+      <h2 class="panel-title">需求输入</h2>
+
+      <label class="field">
+        <span class="field-label">一句话需求</span>
+        <textarea id="req" rows="4" placeholder="例：武义武阳春雨茶礼盒，100g 春茶，面向商务馈赠，希望有文化底蕴">武义武阳春雨茶礼盒，100g 春茶，面向商务馈赠，希望有文化底蕴</textarea>
+      </label>
+
+      <label class="field">
+        <span class="field-label">产品名称（用于效果图排版）</span>
+        <input type="text" id="productName" value="武阳春雨" placeholder="例：武阳春雨" />
+      </label>
+
+      <div class="field-row">
+        <label class="field">
+          <span class="field-label">所属行业</span>
+          <select id="industry">
+            <option value="茶" selected>茶</option>
+            <option value="农产品">农产品</option>
+            <option value="食品">食品</option>
+            <option value="日化">日化</option>
+            <option value="饮料">饮料</option>
+            <option value="文创">文创</option>
+            <option value="礼品">礼品</option>
+            <option value="数码">数码</option>
+            <option value="服装">服装</option>
+            <option value="其他">其他</option>
+          </select>
+        </label>
+        <label class="field">
+          <span class="field-label">价位档</span>
+          <select id="priceTier">
+            <option value="中端" selected>中端</option>
+            <option value="平价">平价</option>
+            <option value="高端">高端</option>
+            <option value="收藏级">收藏级</option>
+          </select>
+        </label>
+      </div>
+
+      <label class="field">
+        <span class="field-label">盒型 / 结构</span>
+        <select id="structure">
+          <option value="中式天地盖硬纸礼盒">中式天地盖硬纸礼盒</option>
+          <option value="简洁天地盖纸盒" selected>简洁天地盖纸盒</option>
+          <option value="书型盒">书型盒</option>
+          <option value="抽屉盒">抽屉盒</option>
+          <option value="开窗盒">开窗盒</option>
+          <option value="袋装">袋装</option>
+          <option value="瓶身标贴">瓶身标贴</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span class="field-label">模式</span>
+        <select id="mode">
+          <option value="auto" selected>自动判定（推荐）</option>
+          <option value="guofeng">强制国风模式</option>
+          <option value="modern">强制现代模式</option>
+        </select>
+      </label>
+
+      <button class="run-btn" id="runBtn">运行智能体</button>
+
+      <div class="cfg-panel">
+        <div class="cfg-head" id="cfgToggle">
+          <span>模型接入</span>
+          <span class="cfg-state" id="cfgState">未配置</span>
+        </div>
+        <div class="cfg-body" id="cfgBody" style="display:none">
+          <label class="field">
+            <span class="field-label">API Base（OpenAI 兼容地址）</span>
+            <input type="text" id="cfgApiBase" value="https://api.siliconflow.cn/v1" />
+          </label>
+          <label class="field">
+            <span class="field-label">模型（需支持图生图）</span>
+            <input type="text" id="cfgModel" value="Qwen/Qwen-Image-Edit" />
+          </label>
+          <label class="field">
+            <span class="field-label">API Key</span>
+            <input type="password" id="cfgApiKey" placeholder="留空则用「任务包代跑」模式" />
+          </label>
+          <label class="field">
+            <span class="field-label">提交方式</span>
+            <select id="cfgMode">
+              <option value="generations">generations（JSON + image 数组）</option>
+              <option value="edits">edits（multipart 表单）</option>
+            </select>
+          </label>
+          <button class="copy-btn" id="cfgSave" style="width:100%">保存配置</button>
+          <p class="txt-sm" style="margin-top:8px">需要启动本地服务（<code>node server.js</code>）才能调用模型。未配 Key 时点击「生成设计图」会产出任务包，可交给 AI 助手代跑。</p>
+        </div>
+      </div>
+
+      <div class="presets">
+        <span class="presets-label">试试这些</span>
+        <button class="preset" data-req="武义武阳春雨茶礼盒，100g 春茶，面向商务馈赠，希望有文化底蕴" data-ind="茶" data-price="高端">高端茶礼盒</button>
+        <button class="preset" data-req="面向年轻人的袋泡茶，电商渠道，要系列化多口味，控制成本" data-ind="茶" data-price="平价">年轻化袋泡茶</button>
+        <button class="preset" data-req="地方特色农产品礼盒，走电商快递，要有地域文化识别度" data-ind="农产品" data-price="中端">农产品伴手礼</button>
+        <button class="preset" data-req="极简风洗护产品瓶身，日化量产，货架识别度优先" data-ind="日化" data-price="中端">日化极简瓶身</button>
+      </div>
+    </aside>
+
+    <section class="panel output-panel">
+      <div id="agentOutput">
+        <div class="empty-state">
+          <div class="empty-mark">纹</div>
+          <h3>输入需求，智能体会自动判定设计体系</h3>
+          <p>它会先判断该走「国风非遗」还是「现代产业」，再从对应分区检索素材，最后输出可执行的设计简报与生图提示词。</p>
+        </div>
+      </div>
+    </section>
+
+  </section>
+</main>
+
+<!-- ================= 素材数据库 ================= -->
+<main class="view" id="view-db">
+  <section class="db-wrap">
+    <div class="db-toolbar">
+      <input type="text" id="dbSearch" class="db-search" placeholder="关键词检索：纹样 / 靛蓝 / 极简 / 礼盒 / 印刷规范…" />
+      <div class="db-filters" id="dbZoneFilter">
+        <button class="chip active" data-zone="all">全部</button>
+        <button class="chip" data-zone="guofeng">国风分区</button>
+        <button class="chip" data-zone="modern">现代分区</button>
+      </div>
+      <div class="db-filters" id="dbTypeFilter">
+        <button class="chip active" data-type="all">不限类型</button>
+        <button class="chip" data-type="pattern">纹样</button>
+        <button class="chip" data-type="color">配色</button>
+        <button class="chip" data-type="texture">肌理</button>
+        <button class="chip" data-type="layout">版式</button>
+        <button class="chip" data-type="template">产业模板</button>
+        <button class="chip" data-type="spec">印刷规范</button>
+        <button class="chip" data-type="reference">团队参考图</button>
+      </div>
+    </div>
+    <div class="db-meta"><span id="dbCount"></span></div>
+    <div class="db-grid" id="dbGrid"></div>
+  </section>
+</main>
+
+<!-- ================= 素材标注 ================= -->
+<main class="view" id="view-tag">
+  <section class="tag-wrap">
+    <div class="tag-intro">
+      <h2>参考素材标注</h2>
+      <p>团队导入的 18 张包装参考图需要标注体系归属（国风 / 现代）。标注完成后，智能体在对应模式下才会把它们作为<strong>风格参考图</strong>参与生图；未标注的图不会被自动调用。标注结果保存在本机浏览器，换电脑需重新标注或导出。</p>
+      <div class="tag-stat" id="tagStat"></div>
+    </div>
+    <div class="tag-grid" id="tagGrid"></div>
+  </section>
+</main>
+
+<!-- ================= 案例验证 ================= -->
+<main class="view" id="view-case">
+  <section class="case-wrap">
+    <div class="case-intro">
+      <h2>案例验证 · 武阳春雨茶</h2>
+      <p>武阳春雨是浙江武义的区域公用品牌，2025 年品牌估值 56.28 亿元，全县茶园 12.82 万亩、全产业链产值 62.7 亿元。它在本项目中<strong>仅作为验证案例</strong>：同一产品分别用两套体系各出一版包装，用来检验智能体与数据库的可用性。</p>
+    </div>
+    <div class="case-grid" id="caseGrid"></div>
+    <div class="case-extra">
+      <h3>模型真实产出 · 图生图结果</h3>
+      <p class="txt">下面这组图是「素材库参考图 + 提示词」真正调用图像模型生成的结果，不是预存演示图。国风版以蓝夹缬纹样素材为参考，现代版以袋装模板素材为参考。</p>
+      <div class="gen-gallery" id="genGallery"></div>
+    </div>
+    <div class="case-extra">
+      <h3>非遗纹样素材 · 数字化入库</h3>
+      <div class="pattern-row">
+        <img class="pattern-img" src="assets/pattern_lanjiaxie.png" alt="蓝夹缬纹样数字化素材" />
+        <div class="pattern-note">
+          <p>蓝夹缬纹样经采集、整理与参数标注后进入国风分区素材库，成为智能体可直接调用的资产（编号 GF-P 系列）。纹样不再只是"被展示"，而是能被反复检索、匹配并组装进新方案。</p>
+          <div class="pattern-links">
+            <button class="mat-link" data-mat="GF-P-01">GF-P-01 · 花树双鸟纹</button>
+            <button class="mat-link" data-mat="GF-C-01">GF-C-01 · 靛蓝主调</button>
+            <button class="mat-link" data-mat="GF-T-01">GF-T-01 · 雕版压印肌理</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="case-extra">
+      <h3>其他产业案例</h3>
+      <img class="case-extra-img" src="assets/case_industry_modern.png" alt="现代商业包装系列案例" />
+      <p>同一套现代体系可平移到食品、日化、文创等不同产业，换色板与模板即可复用，刀版与规范保持一致。</p>
+    </div>
+  </section>
+</main>
+
+<!-- ================= 项目说明 ================= -->
+<main class="view" id="view-about">
+  <section class="about-wrap">
+    <div class="about-card">
+      <h2>这套东西解决什么问题</h2>
+      <p>商业包装设计长期存在三类混乱：国风非遗元素生硬堆砌、国风与现代风格混杂、素材检索低效。本项目把设计方案明确拆成<strong>国风非遗</strong>与<strong>现代产业</strong>两套互不混淆的体系，再用一个垂直领域的 AI 智能体配合分区素材数据库把它们跑通。</p>
+    </div>
+    <h3 class="about-h3">智能体要干的四件事</h3>
+    <div class="about-grid">
+      <div class="about-cell">
+        <span class="cell-no">01</span>
+        <h3>识别需求，自动选模式</h3>
+        <p>输入「武阳春雨茶国风礼品包装」→ 自动切<strong>国风模式</strong>，调用蓝夹缬纹样、传统配色与礼盒版式；输入「电商袋装茶叶、平价快消」→ 切<strong>现代模式</strong>，调用简约扁平规范，不会把非遗纹样硬堆上去。两套规则内置在智能体里，主动约束风格，防止混杂。</p>
+      </div>
+      <div class="about-cell">
+        <span class="cell-no">02</span>
+        <h3>对接素材库，智能检索</h3>
+        <p>素材库人工收集、筛选、分类、标注，分国风区与现代区两个独立素材池。智能体按当前模式只在对应分区检索，素材带独立编号可溯源 —— 不会像通用搜图那样拉来无关图片。</p>
+      </div>
+      <div class="about-cell">
+        <span class="cell-no">03</span>
+        <h3>输出完整方案，不止一张图</h3>
+        <p>输出含版式建议、色彩方案、纹样选用、字体、工艺、<strong>尺寸与材质规格</strong>、印刷与合规注意事项，最后生成包装效果图。效果图由方案参数实时渲染，不是预存图。</p>
+      </div>
+      <div class="about-cell">
+        <span class="cell-no">04</span>
+        <h3>以茶为案例验证可推广性</h3>
+        <p>用同一款武阳春雨茶分别生成国风版与现代版，验证整套工具可用。茶只是测试样例，同一套体系可平移到食品、文创、日用品等产业。</p>
+      </div>
+    </div>
+
+    <h3 class="about-h3">和普通文生图 AI 的区别</h3>
+    <div class="cmp-table">
+      <div class="cmp-row cmp-head">
+        <div>普通文生图 AI（Midjourney / 文心一格）</div>
+        <div>本项目：包装设计 AI 智能体</div>
+      </div>
+      <div class="cmp-row">
+        <div>只根据文字生成图片，没有固定设计范式</div>
+        <div>内置国风 / 现代两套包装设计规则，自动约束风格，防止乱堆元素</div>
+      </div>
+      <div class="cmp-row">
+        <div>素材来自互联网，杂乱无章</div>
+        <div>对接自建、人工分类标注的包装专用素材数据库（41 条，含数字化纹样图）</div>
+      </div>
+      <div class="cmp-row">
+        <div>只输出效果图</div>
+        <div>输出完整方案：版式、配色、纹样、尺寸、印刷提示 + 效果图</div>
+      </div>
+      <div class="cmp-row">
+        <div>通用性强，不了解包装印刷与商业落地</div>
+        <div>垂直面向包装行业，适配产业落地，服务设计师与小微企业</div>
+      </div>
+    </div>
+
+    <div class="about-grid" style="margin-top:18px">
+      <div class="about-cell">
+        <h3>国风体系的设计理论</h3>
+        <p>核心是非遗文化（蓝夹缬），主打文化表达，面向礼品、文创、农产品。智能体在此模式下遵循非遗纹样使用规范 —— 纹样有最小可读尺寸、强调色有面积上限、人物纹样不用于小规格包装，不生硬堆砌。</p>
+      </div>
+      <div class="about-cell">
+        <h3>现代体系的设计理论</h3>
+        <p>核心是量产、电商、市场销售，简约扁平化，不强行加传统元素。智能体在此模式下优先考虑印刷成本、货架展示效果与合规（GB 23350 空隙率、ISO 12647 色彩、刀版结构）。</p>
+      </div>
+      <div class="about-cell">
+        <h3>非遗数字化落地</h3>
+        <p>蓝夹缬技艺 2011 年列入国家级非遗名录（编号 Ⅷ-192），核心工艺集中在浙南。把纹样、配色、肌理参数化入库后，非遗元素才能被反复检索调用，而不只是被展示。</p>
+      </div>
+      <div class="about-cell">
+        <h3>下一步可扩展</h3>
+        <p>接入真实大模型做需求理解、接入向量检索做语义匹配、把刀版图生成与 3D 打样并入链路，并把素材库扩展为团队可协作维护的在线数据库。</p>
+      </div>
+    </div>
+    <div class="about-note">
+      <p><strong>数据与来源说明：</strong>包装行业规模数据参考 2025 年行业统计（全国包装行业规模以上企业 20230 家、营业收入 20546.27 亿元）；武阳春雨品牌与茶产业数据来自武义县政府公开答复与县茶业协会 2025 年度盘点；蓝夹缬工艺与传承信息来自温州市文化广电旅游局及瑞安市公开报道。本页配图为 AI 生成的效果示意，非实物拍摄。</p>
+    </div>
+  </section>
+</main>
+
+<!-- 素材详情弹层 -->
+<div class="modal-mask" id="modalMask">
+  <div class="modal" id="modal"></div>
+</div>
+
+<script src="db.js"></script>
+<script src="agent.js"></script>
+<script src="preview.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
